@@ -33,8 +33,8 @@ maintaining this data and checking the service and database status.
 
 ## Environment variables
 
-The application reads configuration from a `.env` file in the project root.
-Do not commit real credentials to this file.
+The Compose files and the application read configuration from a `.env` file in
+the project root. Do not commit real credentials to this file.
 
 | Variable | Required | Description |
 | --- | --- | --- |
@@ -44,8 +44,11 @@ Do not commit real credentials to this file.
 | `POSTGRES_DB` | Yes | PostgreSQL database name |
 | `POSTGRES_PORT` | No | PostgreSQL port; defaults to `5432` |
 
-For local development, copy the example file and adjust the values for your
-database:
+For the Docker Compose stack, `POSTGRES_HOST` and `POSTGRES_PORT` for the web
+service are set to `db` and `5432` automatically. The values in `.env` are
+used for the PostgreSQL container credentials.
+
+Copy the example file and adjust the values for your database:
 
 ```shell
 cp .env.example .env
@@ -53,27 +56,24 @@ cp .env.example .env
 
 The resulting `.env` file should contain values like those in
 [`.env.example`](.env.example). The `.env` file is ignored by Git and must not
-contain credentials that are committed to the repository.
+contain credentials committed to the repository.
 
 ## Run with Docker
 
-After cloning the repository, start the full stack:
+After cloning the repository, create the environment file and start the stack:
 
 ```shell
-docker compose up -d
+copy .env.example .env
+docker compose up --build -d
 ```
 
 The web application is available at
 <http://localhost:8000/docs>. The container runs the database migrations before
-starting the API.
+starting the API and waits for PostgreSQL to become healthy first.
 
 Inside the Compose network, the API connects to PostgreSQL using the `db`
-service name and port `5432`; the host-side port `5433` is only for external
-database clients.
-
-Adminer is available at <http://localhost:8080/> for database management. Use
-system `PostgreSQL`, server `db`, and the credentials configured in the
-environment.
+service name and port `5432`. The same port is published on the host for
+external database clients, so local tools can connect to `localhost:5432`.
 
 View application logs with:
 
@@ -83,9 +83,17 @@ docker compose logs -f web
 
 Stop the stack with `docker compose down`.
 
+The database data is stored in the named `pgdata` volume. To remove the
+database data as well, run:
+
+```shell
+docker compose down -v
+```
+
 ## Run locally
 
-Start only the development PostgreSQL database:
+Start only the development PostgreSQL database. The database is published on
+`localhost:5432`:
 
 ```shell
 docker compose -f docker-compose-dev.yml up -d
@@ -96,8 +104,13 @@ Create a Python environment and install dependencies:
 ```shell
 poetry env use python3.11
 poetry install
-poetry run alembic -c src/database/alembic.ini upgrade head
+poetry run alembic upgrade head
 ```
+
+The migrations populate a new database with example data: `dev_user` and
+`test_user`, three associated devices, and six measurements for the device
+statistics endpoints. The seed migration is idempotent and does not duplicate
+these records when applied to an existing database.
 
 Start the application in development mode with automatic reload:
 
@@ -114,7 +127,7 @@ For normal operation, start the application without `--reload`:
 poetry run uvicorn src.main:app
 ```
 
-Alternatively, `python -m src.main` starts Uvicorn on `127.0.0.1:8000`.
+Alternatively, `python -m src.main` starts Uvicorn on `0.0.0.0:8081`.
 
 ## Health, version, and logs
 
@@ -133,19 +146,18 @@ Local application logs are printed to the terminal as structured records. For
 the Docker setup, use `docker compose logs -f web` (or
 `docker logs -f fastapi_app`).
 
-## Tests
+## Checks
 
-Install the development dependencies with `poetry install`, then run:
+The project currently has no automated test files or `pytest` dependency. The
+same checks used by CI can be run locally after installing the development
+dependencies:
 
 ```shell
-poetry run pytest
+poetry install
+poetry run mypy .
+poetry run ruff check
+poetry run flake8
 ```
-
-There are currently no test files in the repository, so this command will
-report that no tests were collected once `pytest` is available. `pytest` is not
-currently declared as a development dependency. The CI workflow currently runs
-the linters and type checker; the pytest step is prepared but disabled until
-tests are added.
 
 ## Project Structure
 
@@ -156,13 +168,12 @@ test-task/
 ├── src/
 │   ├── database
 │   │   ├── alembic/
-│   │   ├── alembic.ini
 │   │   ├── __init__.py
 │   │   ├── database.py
 │   │   └── models.py
-│   ├── middlware
+│   ├── middleware
 │   │   ├── __init__.py
-│   │   └── log_middlware.py
+│   │   └── log_middleware.py
 │   ├── routes
 │   │   ├── devices
 │   │   │   ├── __init__.py
@@ -178,13 +189,11 @@ test-task/
 │   │   │   ├── exceptions.py
 │   │   │   ├── schemas.py
 │   │   │   └── views.py
-│   │   ├── healthchecks
-│   │   │   ├── __init__.py
-│   │   │   ├── schema.py
-│   │   │   ├── spec.py
-│   │   │   └── views.py
-│   │   ├── __init__.py
-│   │   ├── app.py
+│   │   └── healthchecks
+│   │       ├── __init__.py
+│   │       ├── schema.py
+│   │       ├── spec.py
+│   │       └── views.py
 │   ├── core
 │   │   ├── config_log.py
 │   │   ├── dependencies.py
@@ -195,11 +204,13 @@ test-task/
 ├── .dockerignore
 ├── .env                                    # Required for local configuration
 ├── .gitignore
+├── .pre-commit-config.yaml
+├── alembic.ini
 ├── CHANGELOG.md
-├── docker-compose-dev.yml                  # Configuration file for dev docker compose (no web)
-├── docker-compose.yml                      # Configuration file for "production" docker compose
+├── docker-compose-dev.yml                  # PostgreSQL only for local development
+├── docker-compose.yml                      # Full Docker Compose stack
 ├── Dockerfile
 ├── poetry.lock
 ├── pyproject.toml
-├── README.md
+└── README.md
 ```
