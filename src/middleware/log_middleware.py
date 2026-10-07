@@ -1,9 +1,8 @@
 import time
-from typing import Callable
+from collections.abc import Callable
 
 import structlog
 from fastapi import Request
-
 
 logger = structlog.get_logger(__name__)
 

@@ -1,22 +1,22 @@
-from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
-import structlog
+from datetime import datetime
+from typing import Annotated
 
-from src.database.database import get_db
+import structlog
+from fastapi import APIRouter, HTTPException, Query, status
+
+from src.dependencies import DbSession
 from src.routes.users.dao import dao
+from src.routes.users.exceptions import (
+    UserAlreadyExistException,
+    UserNotFoundException,
+)
 from src.routes.users.schemas import (
     FullUserSchema,
+    PartialUserSchema,
     UserAggregatedStatsResponse,
     UserDeviceStatsResponse,
     UserWithDevicesSchema,
-    PartialUserSchema,
-)
-from src.routes.users.exceptions import (
-    UserNotFoundException,
-    UserAlreadyExistException,
 )
 
 router = APIRouter(tags=["users"])
@@ -30,7 +30,7 @@ logger = structlog.get_logger()
 )
 async def create_user(
     user_data: PartialUserSchema,
-    session: AsyncSession = Depends(get_db),
+    session: DbSession,
 ):
     """Create a new user."""
     logger.info("create_user: started", user_data=user_data.model_dump())
@@ -51,7 +51,7 @@ async def create_user(
 @router.get("/api/v1/users/{user_id}/", response_model=UserWithDevicesSchema)
 async def get_user(
     user_id: uuid.UUID,
-    session: AsyncSession = Depends(get_db),
+    session: DbSession,
 ):
     """Get user details by ID with associated devices."""
     logger.info("get_user: started", user_id=user_id)
@@ -69,8 +69,8 @@ async def get_user(
     return user
 
 
-@router.get("/api/v1/users/", response_model=List[FullUserSchema])
-async def get_all_users(session: AsyncSession = Depends(get_db)):
+@router.get("/api/v1/users/", response_model=list[FullUserSchema])
+async def get_all_users(session: DbSession):
     """Get list of all users."""
     logger.info("get_all_users: started")
 
@@ -86,9 +86,9 @@ async def get_all_users(session: AsyncSession = Depends(get_db)):
 )
 async def get_user_aggregated_stats(
     user_id: uuid.UUID,
-    session: AsyncSession = Depends(get_db),
-    start_date: Optional[datetime] = Query(None),
-    end_date: Optional[datetime] = Query(None),
+    session: DbSession,
+    start_date: Annotated[datetime | None, Query()] = None,
+    end_date: Annotated[datetime | None, Query()] = None,
 ):
     """Get aggregated statistics for all user's devices"""
     logger.info(
@@ -122,9 +122,9 @@ async def get_user_aggregated_stats(
 )
 async def get_user_devices_stats(
     user_id: uuid.UUID,
-    session: AsyncSession = Depends(get_db),
-    start_date: Optional[datetime] = Query(None),
-    end_date: Optional[datetime] = Query(None),
+    session: DbSession,
+    start_date: Annotated[datetime | None, Query()] = None,
+    end_date: Annotated[datetime | None, Query()] = None,
 ):
     """Get statistics for each user's device separately"""
     logger.info(

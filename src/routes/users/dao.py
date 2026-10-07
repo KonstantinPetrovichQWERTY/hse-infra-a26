@@ -1,12 +1,17 @@
-from datetime import datetime
-from typing import Dict, List, Optional
 import uuid
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.database.models import Device, Measurement, User
+from src.routes.devices.schemas import DeviceSchema, StatsValues
 from src.routes.users.abstract_data_storage import UserDataStorage
+from src.routes.users.exceptions import (
+    UserAlreadyExistException,
+    UserNotFoundException,
+)
 from src.routes.users.schemas import (
     DeviceStats,
     FullUserSchema,
@@ -15,15 +20,9 @@ from src.routes.users.schemas import (
     UserDeviceStatsResponse,
     UserWithDevicesSchema,
 )
-from src.routes.users.exceptions import (
-    UserNotFoundException,
-    UserAlreadyExistException,
-)
-from src.routes.devices.schemas import DeviceSchema, StatsValues
 
 
 class UserPostgreDAO(UserDataStorage):
-
     async def create_user(
         self,
         session: AsyncSession,
@@ -68,7 +67,7 @@ class UserPostgreDAO(UserDataStorage):
     async def get_all_users(
         self,
         session: AsyncSession,
-    ) -> List[FullUserSchema]:
+    ) -> list[FullUserSchema]:
         result = await session.execute(select(User))
         users = result.scalars().all()
 
@@ -78,10 +77,10 @@ class UserPostgreDAO(UserDataStorage):
         self,
         session: AsyncSession,
         user_id: uuid.UUID,
-        start_date: Optional[datetime],
-        end_date: Optional[datetime],
+        start_date: datetime | None,
+        end_date: datetime | None,
     ) -> tuple[
-        User, List[Device], Dict[uuid.UUID, List[Measurement]], List[Measurement]
+        User, list[Device], dict[uuid.UUID, list[Measurement]], list[Measurement]
     ]:
         stmt = (
             select(User)
@@ -108,7 +107,7 @@ class UserPostgreDAO(UserDataStorage):
 
         return user, user.devices, device_measurements_map, all_measurements
 
-    async def _calculate_stats(self, values: List[float]) -> StatsValues:
+    async def _calculate_stats(self, values: list[float]) -> StatsValues:
         if not values:
             return StatsValues(min=0.0, max=0.0, count=0, sum=0.0, median=0.0)
 
@@ -130,10 +129,10 @@ class UserPostgreDAO(UserDataStorage):
         self,
         session: AsyncSession,
         user_id: uuid.UUID,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
     ) -> UserAggregatedStatsResponse:
-        user, devices, _, all_measurements = await self._get_user_measurements(
+        _, devices, _, all_measurements = await self._get_user_measurements(
             session, user_id, start_date, end_date
         )
 
@@ -153,12 +152,15 @@ class UserPostgreDAO(UserDataStorage):
         self,
         session: AsyncSession,
         user_id: uuid.UUID,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
     ) -> UserDeviceStatsResponse:
-        user, devices, device_measurements_map, all_measurements = (
-            await self._get_user_measurements(session, user_id, start_date, end_date)
-        )
+        (
+            _,
+            devices,
+            device_measurements_map,
+            all_measurements,
+        ) = await self._get_user_measurements(session, user_id, start_date, end_date)
 
         devices_stats = []
         for device in devices:

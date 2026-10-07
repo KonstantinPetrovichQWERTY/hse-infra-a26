@@ -1,18 +1,24 @@
 from http import HTTPStatus
 
+import structlog
 from fastapi import APIRouter
 from sqlalchemy import select
-
-from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.exc import SQLAlchemyError
-import structlog
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from src.routes.healthchecks.schema import HealthCheckReadinessOutScheme
 from src.routes.healthchecks.spec import API
 from src.settings import settings
+from src.version import __version__
 
 router = APIRouter(tags=["health-checks"])
 logger = structlog.get_logger()
+
+
+@router.get(API.VERSION, status_code=HTTPStatus.OK)
+async def version() -> dict[str, str]:
+    """Return the current application version."""
+    return {"version": __version__}
 
 
 @router.get(API.LIVENESS, status_code=HTTPStatus.OK)
@@ -54,7 +60,7 @@ async def readiness():
 
     is_alive_database = False
     try:
-        engine = create_async_engine(url=settings.db_connection_url)
+        engine = create_async_engine(url=str(settings.DB_URI))
 
         async with engine.connect() as connect:
             await connect.execute(select(1))
@@ -64,13 +70,13 @@ async def readiness():
 
     except SQLAlchemyError as e:
         logger.warning("readiness: SQLAlchemyError", err=e)
-        msg = f"Database connection error: {str(e)}"
+        msg = f"Database connection error: {e!s}"
     except ConnectionError as e:
         logger.warning("readiness: ConnectionError", err=e)
         msg = "No connection to database"
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - readiness must report unexpected failures
         logger.warning("readiness: Unexpected error", err=e)
-        msg = f"Unexpected error: {str(e)}"
+        msg = f"Unexpected error: {e!s}"
 
     finally:
         items.append({"service": "database", "is_alive": is_alive_database, "msg": msg})

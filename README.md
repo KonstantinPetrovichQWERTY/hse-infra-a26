@@ -1,37 +1,152 @@
-# severstal-test
+# Test Task API
 
-## Assumptions:
-1. I intentionally committed the `.env` file and `settings.toml` because the project is educational and needs to be quickly set up on the local machine of the reviewer. This solution is not for production purposes.
+## Table of Contents
 
-2. I decided to implement a many-to-many relationship between the `devices` and `users` due to the omission in the task.
+- [What the application does](#what-the-application-does)
+- [Assumptions](#assumptions)
+- [Requirements](#requirements)
+- [Environment variables](#environment-variables)
+- [Run with Docker](#run-with-docker)
+- [Run locally](#run-locally)
+- [Health, version, and logs](#health-version-and-logs)
+- [Tests](#tests)
+- [Project Structure](#project-structure)
 
-## How to run
+## What the application does
 
-1. Use Docker after `git clone ...`.
+This is a FastAPI web application for managing users and devices. It provides
+REST API endpoints for creating, reading, updating, and deleting users and
+devices, as well as managing the relationships between them. The application
+is intended for developers and operators who need a small service for
+maintaining this data and checking the service and database status.
+
+## Assumptions
+
+1. A many-to-many relationship between `devices` and `users` is implemented
+   because the original task did not specify the relationship type.
+
+## Requirements
+
+- Python 3.11 or later
+- Poetry 2.x
+- Docker and Docker Compose (for the containerized setup or the local database)
+
+## Environment variables
+
+The application reads configuration from a `.env` file in the project root.
+Do not commit real credentials to this file.
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `POSTGRES_HOST` | Yes | PostgreSQL host name or address |
+| `POSTGRES_USER` | Yes | PostgreSQL user |
+| `POSTGRES_PASSWORD` | Yes | PostgreSQL password |
+| `POSTGRES_DB` | Yes | PostgreSQL database name |
+| `POSTGRES_PORT` | No | PostgreSQL port; defaults to `5432` |
+
+For local development, copy the example file and adjust the values for your
+database:
+
+```shell
+cp .env.example .env
+```
+
+The resulting `.env` file should contain values like those in
+[`.env.example`](.env.example). The `.env` file is ignored by Git and must not
+contain credentials that are committed to the repository.
+
+## Run with Docker
+
+After cloning the repository, start the full stack:
+
 ```shell
 docker compose up -d
 ```
-Web application is running on http://0.0.0.0:8081/docs / http://localhost:8081/docs
 
-Adminer for easier database managment is running on http://localhost:8080/ (system = `PostgreSQL`, Server = `db`, username = `postgres`, password = `password`, database = `gazprom_db`, but check the assumption 1 :) 
+The web application is available at
+<http://localhost:8081/docs>. The container runs the database migrations before
+starting the API.
 
-2. To run locally you need to set up database:
+Adminer is available at <http://localhost:8080/> for database management. Use
+system `PostgreSQL`, server `db`, and the credentials configured in the
+environment.
+
+View application logs with:
+
 ```shell
-docker-compose -f docker-compose-dev.yml up -d
+docker compose logs -f web
 ```
 
+Stop the stack with `docker compose down`.
+
+## Run locally
+
+Start only the development PostgreSQL database:
+
 ```shell
-pip install poetry
+docker compose -f docker-compose-dev.yml up -d
+```
+
+Create a Python environment and install dependencies:
+
+```shell
+poetry env use python3.11
 poetry install
-poetry alembic upgrade head
-poetry run hypercorn main:app --reload
+poetry run alembic upgrade head
 ```
-WARNING: Up venv python 3.11 and use first method to run :)
+
+Start the application in development mode with automatic reload:
+
+```shell
+poetry run uvicorn main:app --reload
+```
+
+Open the interactive API documentation at
+<http://localhost:8081/docs>.
+
+For normal operation, start the application without `--reload`:
+
+```shell
+poetry run uvicorn main:app --host 0.0.0.0 --port 8081
+```
+
+Alternatively, `python main.py` starts Uvicorn on `0.0.0.0:8081`.
+
+## Health, version, and logs
+
+With the application running, check its liveness and version:
+
+```shell
+curl http://localhost:8081/health
+curl http://localhost:8081/version
+```
+
+`/health` returns the service liveness status. `/version` returns the
+application version. The readiness endpoint is available at `/readness` and
+checks database connectivity.
+
+Local application logs are printed to the terminal as structured records. For
+the Docker setup, use `docker compose logs -f web` (or
+`docker logs -f fastapi_app`).
+
+## Tests
+
+Install the development dependencies with `poetry install`, then run:
+
+```shell
+poetry run pytest
+```
+
+There are currently no test files in the repository, so this command will
+report that no tests were collected once `pytest` is available. `pytest` is not
+currently declared as a development dependency. The CI workflow currently runs
+the linters and type checker; the pytest step is prepared but disabled until
+tests are added.
 
 ## Project Structure
 
 ```shell
-severstal-test/
+test-task/
 ├── github/workflows
 │   └── ci.yml
 ├── src/
@@ -70,17 +185,15 @@ severstal-test/
 │   │   ├── utils.py
 │   │   └── version.py
 ├── .dockerignore
-├── .env                                    # Check assumption 1
+├── .env                                    # Required for local configuration
 ├── .gitignore
 ├── alembic.ini
 ├── CHANGELOG.md
-├── docker-compose-dev.yml                  # Configuration file for dev docker compose (no web) 
+├── docker-compose-dev.yml                  # Configuration file for dev docker compose (no web)
 ├── docker-compose.yml                      # Configuration file for "production" docker compose
 ├── Dockerfile
-├── hypercorn.conf.py
 ├── main.py
 ├── poetry.lock
 ├── pyproject.toml
 ├── README.md
-└── settings.toml
 ```

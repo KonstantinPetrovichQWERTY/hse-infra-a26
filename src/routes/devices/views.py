@@ -1,12 +1,11 @@
-from datetime import datetime
-from typing import List, Optional
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from datetime import datetime
+from typing import Annotated
+
 import structlog
+from fastapi import APIRouter, HTTPException, Query, status
 
-from src.database.database import get_db
-from sqlalchemy.ext.asyncio import AsyncSession
-
+from src.dependencies import DbSession
 from src.routes.devices.dao import dao
 from src.routes.devices.exceptions import (
     DeviceNotFoundException,
@@ -24,7 +23,6 @@ from src.routes.devices.schemas import (
 from src.routes.users.exceptions import UserAlreadyExistException, UserNotFoundException
 from src.routes.users.schemas import FullUserSchema
 
-
 router = APIRouter(tags=["devices"])
 logger = structlog.get_logger()
 
@@ -36,7 +34,7 @@ logger = structlog.get_logger()
 )
 async def register_new_device(
     device_data: PartialDeviceSchema,
-    session: AsyncSession = Depends(get_db),
+    session: DbSession,
 ):
     """Register a new device in the system."""
 
@@ -60,8 +58,8 @@ async def register_new_device(
     return new_device
 
 
-@router.get("/api/v1/devices/", response_model=List[DeviceSchema])
-async def get_all_devices(session: AsyncSession = Depends(get_db)):
+@router.get("/api/v1/devices/", response_model=list[DeviceSchema])
+async def get_all_devices(session: DbSession):
     """Get list of all devices with pagination"""
     logger.info("get_all_devices: started")
 
@@ -79,7 +77,7 @@ async def get_all_devices(session: AsyncSession = Depends(get_db)):
 
 
 @router.get("/api/v1/devices/{device_id}/", response_model=DeviceWithUsersSchema)
-async def get_device(device_id: uuid.UUID, session: AsyncSession = Depends(get_db)):
+async def get_device(device_id: uuid.UUID, session: DbSession):
     """Get device details by ID"""
     logger.info("get_device: started", device_id=device_id)
 
@@ -104,7 +102,7 @@ async def get_device(device_id: uuid.UUID, session: AsyncSession = Depends(get_d
 async def add_measurement(
     device_id: uuid.UUID,
     measurement_data: MeasurementCreateSchema,
-    session: AsyncSession = Depends(get_db),
+    session: DbSession,
 ):
     """Add new measurement for specific device"""
     logger.info("add_measurement: started", device_id=device_id)
@@ -125,13 +123,13 @@ async def add_measurement(
 
 
 @router.get(
-    "/api/v1/devices/{device_id}/measurements/", response_model=List[MeasurementSchema]
+    "/api/v1/devices/{device_id}/measurements/", response_model=list[MeasurementSchema]
 )
 async def get_device_measurements(
     device_id: uuid.UUID,
-    session: AsyncSession = Depends(get_db),
-    start_date: Optional[datetime] = Query(None),
-    end_date: Optional[datetime] = Query(None),
+    session: DbSession,
+    start_date: Annotated[datetime | None, Query()] = None,
+    end_date: Annotated[datetime | None, Query()] = None,
 ):
     """Get measurements for device with optional date filtering"""
     logger.info("get_device_measurements: started", device_id=device_id)
@@ -159,9 +157,9 @@ async def get_device_measurements(
 @router.get("/api/v1/devices/{device_id}/stats/", response_model=DeviceStatsResponse)
 async def get_device_stats(
     device_id: uuid.UUID,
-    session: AsyncSession = Depends(get_db),
-    start_date: Optional[datetime] = Query(None),
-    end_date: Optional[datetime] = Query(None),
+    session: DbSession,
+    start_date: Annotated[datetime | None, Query()] = None,
+    end_date: Annotated[datetime | None, Query()] = None,
 ):
     """Get statistical analysis for device measurements"""
     logger.info("get_device_stats: started", device_id=device_id)
@@ -196,7 +194,9 @@ async def get_device_stats(
     status_code=status.HTTP_201_CREATED,
 )
 async def add_user_to_device(
-    device_id: uuid.UUID, user_id: uuid.UUID, session: AsyncSession = Depends(get_db)
+    device_id: uuid.UUID,
+    user_id: uuid.UUID,
+    session: DbSession,
 ):
     """Add user to device (many-to-many relationship)"""
     logger.info("add_user_to_device: started", device_id=device_id)
@@ -236,10 +236,8 @@ async def add_user_to_device(
     return device
 
 
-@router.get("/api/v1/devices/{device_id}/users/", response_model=List[FullUserSchema])
-async def get_device_users(
-    device_id: uuid.UUID, session: AsyncSession = Depends(get_db)
-):
+@router.get("/api/v1/devices/{device_id}/users/", response_model=list[FullUserSchema])
+async def get_device_users(device_id: uuid.UUID, session: DbSession):
     """Get list of users assigned to device"""
     logger.info("get_device_users: started", device_id=device_id)
 
