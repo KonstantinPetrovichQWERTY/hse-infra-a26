@@ -39,6 +39,11 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_USER: ci
+      POSTGRES_PASSWORD: ci
+      POSTGRES_DB: ci
 
     steps:
       - name: Checkout code
