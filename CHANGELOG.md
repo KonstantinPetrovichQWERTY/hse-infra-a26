@@ -22,7 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add 
 - Set up a dev Docker Compose configuration to run PostgreSQL and Adminer.
 - Add .env file.
 

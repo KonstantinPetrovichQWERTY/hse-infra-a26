@@ -77,7 +77,7 @@ severstal-test/
 ├── .gitignore
 ├── alembic.ini
 ├── CHANGELOG.md
-├── docker-compose-dev.yml                  # Configuration file for dev docker compose (no web) 
+├── docker-compose-dev.yml                  # Configuration file for dev docker compose (no web)
 ├── docker-compose.yml                      # Configuration file for "production" docker compose
 ├── Dockerfile
 ├── main.py
