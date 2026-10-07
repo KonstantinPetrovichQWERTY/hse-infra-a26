@@ -1,7 +1,7 @@
 [project]
-name = "gazprom-test-task"
+name = "test-task"
 version = "0.4.0"
-description = "Gazprom internship test task"
+description = "Test task"
 authors = [
     {name = "KonstantinPetrovichQWERTY",email = "skatkov24@mail.ru"}
 ]

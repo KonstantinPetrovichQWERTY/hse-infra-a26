@@ -1,4 +1,4 @@
-name: Gazprom test task
+name: Test task
 
 on:
   pull_request:

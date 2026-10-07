@@ -1,4 +1,4 @@
-# severstal-test
+# test-task
 
 ## Assumptions
 
@@ -14,7 +14,7 @@ docker compose up -d
 
 Web application is running on <http://0.0.0.0:8081/docs> / <http://localhost:8081/docs>
 
-Adminer for easier database managment is running on <http://localhost:8080/> (system = `PostgreSQL`, Server = `db`, username = `postgres`, password = `password`, database = `gazprom_db`)
+Adminer for easier database managment is running on <http://localhost:8080/> (system = `PostgreSQL`, Server = `db`, username = `postgres`, password = `password`, database = `test_task_db`)
 
 1. To run locally you need to set up database:
 
@@ -34,7 +34,7 @@ WARNING: Up venv python 3.11 and use first method to run :)
 ## Project Structure
 
 ```shell
-severstal-test/
+test-task/
 ├── github/workflows
 │   └── ci.yml
 ├── src/
