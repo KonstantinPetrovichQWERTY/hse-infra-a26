@@ -29,7 +29,7 @@ def create_app(init_db: bool = True) -> FastAPI:
         FastAPI: Configured application instance.
     """
     if init_db:
-        sessionmanager.init(settings.db_connection_url)
+        sessionmanager.init(str(settings.DB_URI))
 
         @asynccontextmanager
         async def lifespan(app: FastAPI):

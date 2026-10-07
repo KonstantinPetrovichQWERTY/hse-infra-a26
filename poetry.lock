@@ -155,28 +155,6 @@ files = [
 ]
 
 [[package]]
-name = "dynaconf"
-version = "3.2.10"
-description = "The dynamic configurator for your Python Project"
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "dynaconf-3.2.10-py2.py3-none-any.whl", hash = "sha256:7f70a4b8a8861efb88d8267aeb6f246c791dc34ecbb8299c26a19abd59113df6"},
-    {file = "dynaconf-3.2.10.tar.gz", hash = "sha256:8dbeef31a2343c8342c9b679772c3d005b4801c587cf2f525f98f57ec2f607f1"},
-]
-
-[package.extras]
-all = ["configobj", "hvac", "redis", "ruamel.yaml"]
-configobj = ["configobj"]
-ini = ["configobj"]
-redis = ["redis"]
-test = ["configobj", "django", "flask (>=0.12)", "hvac (>=1.1.0)", "pytest", "pytest-cov", "pytest-mock", "pytest-xdist", "python-dotenv", "radon", "redis", "toml"]
-toml = ["toml"]
-vault = ["hvac"]
-yaml = ["ruamel.yaml"]
-
-[[package]]
 name = "fastapi"
 version = "0.115.12"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
@@ -729,6 +707,30 @@ files = [
 typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
+name = "pydantic-settings"
+version = "2.15.0"
+description = "Settings management using Pydantic"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "pydantic_settings-2.15.0-py3-none-any.whl", hash = "sha256:0ba092c291c94baceb5eff768aa0d56400a457585bc0175925a5a5510303da42"},
+    {file = "pydantic_settings-2.15.0.tar.gz", hash = "sha256:694b793e84f766ba76a90ebdefc01d0a9a045dab0382bee70393da93712ad117"},
+]
+
+[package.dependencies]
+pydantic = ">=2.7.0"
+python-dotenv = ">=0.21.0"
+typing-inspection = ">=0.4.0"
+
+[package.extras]
+aws-secrets-manager = ["boto3 (>=1.35.0)"]
+azure-key-vault = ["azure-identity (>=1.16.0)", "azure-keyvault-secrets (>=4.8.0)"]
+gcp-secret-manager = ["google-cloud-secret-manager (>=2.23.1)"]
+toml = ["tomli (>=2.0.1)"]
+yaml = ["pyyaml (>=6.0.1)"]
+
+[[package]]
 name = "pyflakes"
 version = "3.3.2"
 description = "passive checker of Python programs"
@@ -754,6 +756,21 @@ files = [
 
 [package.dependencies]
 filelock = ">=3.15.4"
+
+[[package]]
+name = "python-dotenv"
+version = "1.2.4"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "python_dotenv-1.2.4-py3-none-any.whl", hash = "sha256:42269a8a5b3fd54ffa6f3d84b18abed50064717576b4ecf03dc4a55d8aa04fdc"},
+    {file = "python_dotenv-1.2.4.tar.gz", hash = "sha256:f0d53e69935a851c0dcc78f3ab7aaccd8cabef0b92382b576b824212902873c0"},
+]
+
+[package.extras]
+cli = ["click (>=5.0)"]
 
 [[package]]
 name = "pytz"
@@ -1104,4 +1121,4 @@ python-discovery = ">=1.6"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "67b5701692ffa927eb8d0bafa3c092a6faf190a1931f56196173a5ff4c038387"
+content-hash = "9197282e51e7b53e0c89b9be447db4317a76c26b79936165224ed8014b33a4e0"

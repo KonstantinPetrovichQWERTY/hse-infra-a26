@@ -54,7 +54,7 @@ async def readiness():
 
     is_alive_database = False
     try:
-        engine = create_async_engine(url=settings.db_connection_url)
+        engine = create_async_engine(url=str(settings.DB_URI))
 
         async with engine.connect() as connect:
             await connect.execute(select(1))

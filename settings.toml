@@ -1,2 +1,0 @@
-[default]
-db_connection_url="@format postgresql+asyncpg://{env[POSTGRES_USER]}:{env[POSTGRES_PASSWORD]}@db:5432/{env[POSTGRES_DB]}"
