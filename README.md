@@ -64,8 +64,12 @@ docker compose up -d
 ```
 
 The web application is available at
-<http://localhost:8081/docs>. The container runs the database migrations before
+<http://localhost:8000/docs>. The container runs the database migrations before
 starting the API.
+
+Inside the Compose network, the API connects to PostgreSQL using the `db`
+service name and port `5432`; the host-side port `5433` is only for external
+database clients.
 
 Adminer is available at <http://localhost:8080/> for database management. Use
 system `PostgreSQL`, server `db`, and the credentials configured in the
@@ -92,33 +96,33 @@ Create a Python environment and install dependencies:
 ```shell
 poetry env use python3.11
 poetry install
-poetry run alembic upgrade head
+poetry run alembic -c src/database/alembic.ini upgrade head
 ```
 
 Start the application in development mode with automatic reload:
 
 ```shell
-poetry run uvicorn main:app --reload
+poetry run uvicorn src.main:app --reload
 ```
 
 Open the interactive API documentation at
-<http://localhost:8081/docs>.
+<http://localhost:8000/docs>.
 
 For normal operation, start the application without `--reload`:
 
 ```shell
-poetry run uvicorn main:app --host 0.0.0.0 --port 8081
+poetry run uvicorn src.main:app
 ```
 
-Alternatively, `python main.py` starts Uvicorn on `0.0.0.0:8081`.
+Alternatively, `python -m src.main` starts Uvicorn on `127.0.0.1:8000`.
 
 ## Health, version, and logs
 
 With the application running, check its liveness and version:
 
 ```shell
-curl http://localhost:8081/health
-curl http://localhost:8081/version
+curl http://localhost:8000/health
+curl http://localhost:8000/version
 ```
 
 `/health` returns the service liveness status. `/version` returns the
@@ -152,6 +156,7 @@ test-task/
 ├── src/
 │   ├── database
 │   │   ├── alembic/
+│   │   ├── alembic.ini
 │   │   ├── __init__.py
 │   │   ├── database.py
 │   │   └── models.py
@@ -180,19 +185,20 @@ test-task/
 │   │   │   └── views.py
 │   │   ├── __init__.py
 │   │   ├── app.py
+│   ├── core
 │   │   ├── config_log.py
+│   │   ├── dependencies.py
 │   │   ├── settings.py
-│   │   ├── utils.py
-│   │   └── version.py
+│   │   └── utils.py
+│   ├── app.py
+│   └── main.py
 ├── .dockerignore
 ├── .env                                    # Required for local configuration
 ├── .gitignore
-├── alembic.ini
 ├── CHANGELOG.md
 ├── docker-compose-dev.yml                  # Configuration file for dev docker compose (no web)
 ├── docker-compose.yml                      # Configuration file for "production" docker compose
 ├── Dockerfile
-├── main.py
 ├── poetry.lock
 ├── pyproject.toml
 ├── README.md

@@ -5,7 +5,7 @@ from typing import Annotated
 import structlog
 from fastapi import APIRouter, HTTPException, Query, status
 
-from src.dependencies import DbSession
+from src.core.dependencies import DbSession
 from src.routes.users.dao import dao
 from src.routes.users.exceptions import (
     UserAlreadyExistException,

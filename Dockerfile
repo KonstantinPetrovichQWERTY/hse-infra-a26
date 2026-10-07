@@ -5,8 +5,6 @@ ARG WORKDIR=/
 RUN pip install poetry==2.1.1
 COPY pyproject.toml \
      poetry.lock \
-     main.py \
-     alembic.ini \
      README.md \
      .env \
      $WORKDIR
@@ -20,7 +18,7 @@ RUN poetry cache clear --all pypi
 
 RUN poetry install --no-interaction --no-ansi -vvv --no-root
 
-EXPOSE 8080
+EXPOSE 8000
 ENV PYTHONPATH=.
 
-CMD sh -c "poetry run alembic upgrade head && poetry run uvicorn main:app --host 0.0.0.0 --port 8081"
+CMD sh -c "poetry run alembic -c src/database/alembic.ini upgrade head && poetry run uvicorn src.main:app"
