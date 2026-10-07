@@ -1,26 +1,22 @@
-FROM python:3.11.11-slim
+FROM acidrain/python-poetry:3.11-slim-2.5.1
 
-ARG SRCDIR=src
-ARG WORKDIR=/
-RUN pip install poetry==2.1.1
-COPY pyproject.toml \
-     poetry.lock \
-     main.py \
-     alembic.ini \
-     README.md \
-     .env \
-     $WORKDIR
-COPY $SRCDIR $WORKDIR/$SRCDIR/
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_CREATE=false
 
-WORKDIR $WORKDIR
-RUN poetry config virtualenvs.create false
-RUN poetry source add global https://pypi.org/simple
+WORKDIR /app
 
-RUN poetry cache clear --all pypi
+COPY pyproject.toml poetry.lock README.md alembic.ini ./
+RUN poetry install --only main --no-root --no-ansi
 
-RUN poetry install --no-interaction --no-ansi -vvv --no-root
+COPY src ./src
 
-EXPOSE 8080
+RUN useradd --create-home --shell /usr/sbin/nologin appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 8000
 ENV PYTHONPATH=.
 
-CMD sh -c "poetry run alembic upgrade head && poetry run uvicorn main:app --host 0.0.0.0 --port 8081"
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn src.main:app --host 0.0.0.0 --port 8000"]

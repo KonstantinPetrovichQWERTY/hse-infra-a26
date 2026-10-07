@@ -6,10 +6,10 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from src.core.settings import settings
+from src.core.utils import __version__
 from src.routes.healthchecks.schema import HealthCheckReadinessOutScheme
 from src.routes.healthchecks.spec import API
-from src.settings import settings
-from src.version import __version__
 
 router = APIRouter(tags=["health-checks"])
 logger = structlog.get_logger()

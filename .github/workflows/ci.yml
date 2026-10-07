@@ -1,6 +1,9 @@
 name: Test task
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -34,5 +37,34 @@ jobs:
       - name: Run flake8
         run: poetry run flake8
 
-      # - name: Run tests
-      #   run: poetry run pytest
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_USER: ci
+      POSTGRES_PASSWORD: ci
+      POSTGRES_DB: ci
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Set up dependencies
+        run: poetry install --no-root
+
+      - name: Run tests
+        run: poetry run python -m pytest -v
+
+      - name: Upload application artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: application
+          path: src/
