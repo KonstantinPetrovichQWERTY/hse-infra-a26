@@ -1,22 +1,22 @@
+import uuid
 from datetime import datetime
-from typing import List, Optional
+
+import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-import uuid
-import structlog
 
 from src.database.database import get_db
 from src.routes.users.dao import dao
+from src.routes.users.exceptions import (
+    UserAlreadyExistException,
+    UserNotFoundException,
+)
 from src.routes.users.schemas import (
     FullUserSchema,
+    PartialUserSchema,
     UserAggregatedStatsResponse,
     UserDeviceStatsResponse,
     UserWithDevicesSchema,
-    PartialUserSchema,
-)
-from src.routes.users.exceptions import (
-    UserNotFoundException,
-    UserAlreadyExistException,
 )
 
 router = APIRouter(tags=["users"])
@@ -69,7 +69,7 @@ async def get_user(
     return user
 
 
-@router.get("/api/v1/users/", response_model=List[FullUserSchema])
+@router.get("/api/v1/users/", response_model=list[FullUserSchema])
 async def get_all_users(session: AsyncSession = Depends(get_db)):
     """Get list of all users."""
     logger.info("get_all_users: started")
@@ -87,8 +87,8 @@ async def get_all_users(session: AsyncSession = Depends(get_db)):
 async def get_user_aggregated_stats(
     user_id: uuid.UUID,
     session: AsyncSession = Depends(get_db),
-    start_date: Optional[datetime] = Query(None),
-    end_date: Optional[datetime] = Query(None),
+    start_date: datetime | None = Query(None),
+    end_date: datetime | None = Query(None),
 ):
     """Get aggregated statistics for all user's devices"""
     logger.info(
@@ -123,8 +123,8 @@ async def get_user_aggregated_stats(
 async def get_user_devices_stats(
     user_id: uuid.UUID,
     session: AsyncSession = Depends(get_db),
-    start_date: Optional[datetime] = Query(None),
-    end_date: Optional[datetime] = Query(None),
+    start_date: datetime | None = Query(None),
+    end_date: datetime | None = Query(None),
 ):
     """Get statistics for each user's device separately"""
     logger.info(

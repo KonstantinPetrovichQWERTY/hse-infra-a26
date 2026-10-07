@@ -6,3 +6,4 @@ class API(str, Enum):
 
     LIVENESS = "/health"
     READINESS = "/readness"
+    VERSION = "/version"

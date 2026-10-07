@@ -1,15 +1,15 @@
+import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List, Optional
-import uuid
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.routes.users.schemas import (
     FullUserSchema,
+    PartialUserSchema,
     UserAggregatedStatsResponse,
     UserDeviceStatsResponse,
     UserWithDevicesSchema,
-    PartialUserSchema,
 )
 
 
@@ -23,7 +23,6 @@ class UserDataStorage(ABC):
         user_data: PartialUserSchema,
     ) -> FullUserSchema:
         """Create a new user record in the database."""
-        pass
 
     @abstractmethod
     async def get_user(
@@ -32,34 +31,30 @@ class UserDataStorage(ABC):
         user_id: uuid.UUID,
     ) -> UserWithDevicesSchema:
         """Retrieve a single user by ID with associated devices."""
-        pass
 
     @abstractmethod
     async def get_all_users(
         self,
         session: AsyncSession,
-    ) -> List[FullUserSchema]:
+    ) -> list[FullUserSchema]:
         """Retrieve all users from the database."""
-        pass
 
     @abstractmethod
     async def get_user_aggregated_stats(
         self,
         session: AsyncSession,
         user_id: uuid.UUID,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
     ) -> UserAggregatedStatsResponse:
         """Get aggregated statistics for all user's devices"""
-        pass
 
     @abstractmethod
     async def get_user_devices_stats(
         self,
         session: AsyncSession,
         user_id: uuid.UUID,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
     ) -> UserDeviceStatsResponse:
         """Get statistics for each user's device separately"""
-        pass

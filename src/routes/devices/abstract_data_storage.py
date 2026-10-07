@@ -1,7 +1,7 @@
+import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List, Optional
-import uuid
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.routes.devices.schemas import (
@@ -33,7 +33,6 @@ class DeviceDataStorage(ABC):
         Returns:
             DeviceWithUsersSchema: pydantic device schema
         """
-        pass
 
     @abstractmethod
     async def register_new_device(
@@ -50,7 +49,6 @@ class DeviceDataStorage(ABC):
         Returns:
             DeviceSchema: Newly created device with generated ID field
         """
-        pass
 
     @abstractmethod
     async def get_all_devices(self, session: AsyncSession) -> list[DeviceSchema]:
@@ -62,15 +60,14 @@ class DeviceDataStorage(ABC):
         Returns:
             list[DeviceSchema]: List of devices
         """
-        pass
 
     @abstractmethod
     async def get_device_stats(
         self,
         session: AsyncSession,
         device_id: uuid.UUID,
-        start_date: Optional[datetime],
-        end_date: Optional[datetime],
+        start_date: datetime | None,
+        end_date: datetime | None,
     ) -> DeviceStatsResponse:
         """Calculate aggregate statistics for device within specified time window.
 
@@ -82,7 +79,6 @@ class DeviceDataStorage(ABC):
         Returns:
             DeviceStatsResponse: Aggregated statistics
         """
-        pass
 
     @abstractmethod
     async def add_measurement(
@@ -101,16 +97,15 @@ class DeviceDataStorage(ABC):
         Returns:
             MeasurementSchema: Created measurement
         """
-        pass
 
     @abstractmethod
     async def get_device_measurements(
         self,
         session: AsyncSession,
         device_id: uuid.UUID,
-        start_date: Optional[datetime],
-        end_date: Optional[datetime],
-    ) -> List[MeasurementSchema]:
+        start_date: datetime | None,
+        end_date: datetime | None,
+    ) -> list[MeasurementSchema]:
         """Retrieve measurements for a device with optional time filtering.
 
         Args:
@@ -122,7 +117,6 @@ class DeviceDataStorage(ABC):
         Returns:
             List[MeasurementSchema]: List of measurements
         """
-        pass
 
     @abstractmethod
     async def add_user_to_device(
@@ -141,14 +135,13 @@ class DeviceDataStorage(ABC):
         Returns:
             DeviceWithUsersSchema: Updated device with users
         """
-        pass
 
     @abstractmethod
     async def get_device_users(
         self,
         session: AsyncSession,
         device_id: uuid.UUID,
-    ) -> List[UserSchema]:
+    ) -> list[UserSchema]:
         """Get list of users assigned to a device.
 
         Args:
@@ -158,4 +151,3 @@ class DeviceDataStorage(ABC):
         Returns:
             List[UserSchema]: List of users
         """
-        pass

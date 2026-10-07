@@ -27,5 +27,5 @@ class Settings(BaseSettings):
         )
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]
 settings.build_db_uri()

@@ -1,6 +1,5 @@
-from datetime import datetime
-from typing import Optional, List
 import uuid
+from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,8 +9,8 @@ from src.database.models import Device, Measurement, User
 from src.routes.devices.abstract_data_storage import DeviceDataStorage
 from src.routes.devices.exceptions import (
     DeviceNotFoundException,
-    MeasurementNotFoundException,
     DeviceSerialNumberException,
+    MeasurementNotFoundException,
 )
 from src.routes.devices.schemas import (
     DeviceSchema,
@@ -26,7 +25,6 @@ from src.routes.users.exceptions import UserAlreadyExistException, UserNotFoundE
 
 
 class DevicePostgreDAO(DeviceDataStorage):
-
     async def get_device(
         self,
         session: AsyncSession,
@@ -46,7 +44,7 @@ class DevicePostgreDAO(DeviceDataStorage):
         result = DeviceWithUsersSchema(
             id=device.id,
             serial_number=device.serial_number,
-            users=[UserSchema(name=user.name, id=user.id) for user in device.users]
+            users=[UserSchema(name=user.name, id=user.id) for user in device.users],
         )
 
         return result
@@ -94,8 +92,8 @@ class DevicePostgreDAO(DeviceDataStorage):
         self,
         session: AsyncSession,
         device_id: uuid.UUID,
-        start_date: Optional[datetime],
-        end_date: Optional[datetime],
+        start_date: datetime | None,
+        end_date: datetime | None,
     ) -> DeviceStatsResponse:
         device = await session.get(Device, device_id)
 
@@ -178,9 +176,9 @@ class DevicePostgreDAO(DeviceDataStorage):
         self,
         session: AsyncSession,
         device_id: uuid.UUID,
-        start_date: Optional[datetime],
-        end_date: Optional[datetime],
-    ) -> List[MeasurementSchema]:
+        start_date: datetime | None,
+        end_date: datetime | None,
+    ) -> list[MeasurementSchema]:
         query = select(Measurement).where(Measurement.device_id == device_id)
 
         if start_date:
@@ -243,7 +241,7 @@ class DevicePostgreDAO(DeviceDataStorage):
         self,
         session: AsyncSession,
         device_id: uuid.UUID,
-    ) -> List[UserSchema]:
+    ) -> list[UserSchema]:
         stmt = (
             select(Device)
             .where(Device.id == device_id)
