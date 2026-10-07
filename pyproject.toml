@@ -1,6 +1,6 @@
 [project]
 name = "test-task"
-version = "0.4.0"
+version = "0.5.0"
 description = "Test task"
 authors = [
     {name = "KonstantinPetrovichQWERTY",email = "skatkov24@mail.ru"}
