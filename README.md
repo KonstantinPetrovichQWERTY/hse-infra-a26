@@ -1,9 +1,7 @@
 # severstal-test
 
 ## Assumptions:
-1. I intentionally committed the `.env` file and `settings.toml` because the project is educational and needs to be quickly set up on the local machine of the reviewer. This solution is not for production purposes.
-
-2. I decided to implement a many-to-many relationship between the `devices` and `users` due to the omission in the task.
+1. I decided to implement a many-to-many relationship between the `devices` and `users` due to the omission in the task.
 
 ## How to run
 
@@ -13,7 +11,7 @@ docker compose up -d
 ```
 Web application is running on http://0.0.0.0:8081/docs / http://localhost:8081/docs
 
-Adminer for easier database managment is running on http://localhost:8080/ (system = `PostgreSQL`, Server = `db`, username = `postgres`, password = `password`, database = `gazprom_db`, but check the assumption 1 :) 
+Adminer for easier database managment is running on http://localhost:8080/ (system = `PostgreSQL`, Server = `db`, username = `postgres`, password = `password`, database = `gazprom_db`)
 
 2. To run locally you need to set up database:
 ```shell
@@ -70,7 +68,7 @@ severstal-test/
 │   │   ├── utils.py
 │   │   └── version.py
 ├── .dockerignore
-├── .env                                    # Check assumption 1
+├── .env                                    # Required for local configuration
 ├── .gitignore
 ├── alembic.ini
 ├── CHANGELOG.md
