@@ -146,18 +146,18 @@ Local application logs are printed to the terminal as structured records. For
 the Docker setup, use `docker compose logs -f web` (or
 `docker logs -f fastapi_app`).
 
-## Checks
+## Tests
 
-The project currently has no automated test files or `pytest` dependency. The
-same checks used by CI can be run locally after installing the development
-dependencies:
+Install the development dependencies and run the test suite locally:
 
 ```shell
 poetry install
-poetry run mypy .
-poetry run ruff check
-poetry run flake8
+python -m pytest -v
 ```
+
+GitHub Actions runs the linters and tests for pushes to `main` and for pull
+requests targeting `main`. After a successful test run, the workflow publishes
+the application source files as the `application` artifact.
 
 ## Project Structure
 

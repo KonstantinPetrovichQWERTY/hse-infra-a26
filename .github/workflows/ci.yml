@@ -1,6 +1,9 @@
 name: Test task
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -34,5 +37,11 @@ jobs:
       - name: Run flake8
         run: poetry run flake8
 
-      # - name: Run tests
-      #   run: poetry run pytest
+      - name: Run tests
+        run: poetry run python -m pytest -v
+
+      - name: Upload application artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: application
+          path: src/

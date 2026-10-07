@@ -28,14 +28,15 @@ def create_app(init_db: bool = True) -> FastAPI:
     Returns:
         FastAPI: Configured application instance.
     """
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        yield
+        if init_db and sessionmanager._engine is not None:
+            await sessionmanager.close()
+
     if init_db:
         sessionmanager.init(str(settings.DB_URI))
-
-        @asynccontextmanager
-        async def lifespan(app: FastAPI):
-            yield
-            if sessionmanager._engine is not None:
-                await sessionmanager.close()
 
     app = FastAPI(
         title=get_service_name(),

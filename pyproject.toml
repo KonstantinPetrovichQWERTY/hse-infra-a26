@@ -33,6 +33,7 @@ flake8-pyproject = "^1.2.3"
 mypy = "^1.15.0"
 pre-commit = "^4.6.2"
 ruff = "^0.16.10"
+pytest = "^9.1.1"
 
 [tool.flake8]
 exclude = [
