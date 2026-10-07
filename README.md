@@ -22,7 +22,7 @@ docker-compose -f docker-compose-dev.yml up -d
 pip install poetry
 poetry install
 poetry alembic upgrade head
-poetry run hypercorn main:app --reload
+poetry run uvicorn main:app --reload
 ```
 WARNING: Up venv python 3.11 and use first method to run :)
 
@@ -75,7 +75,6 @@ severstal-test/
 ├── docker-compose-dev.yml                  # Configuration file for dev docker compose (no web) 
 ├── docker-compose.yml                      # Configuration file for "production" docker compose
 ├── Dockerfile
-├── hypercorn.conf.py
 ├── main.py
 ├── poetry.lock
 ├── pyproject.toml

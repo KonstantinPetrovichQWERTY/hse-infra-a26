@@ -6,7 +6,6 @@ RUN pip install poetry==2.1.1
 COPY pyproject.toml \
      poetry.lock \
      settings.toml \
-     hypercorn.conf.py \
      main.py \
      alembic.ini \
      README.md \
@@ -20,10 +19,9 @@ RUN poetry source add global https://pypi.org/simple
 
 RUN poetry cache clear --all pypi
 
-RUN poetry add uvloop@^0.19.0
 RUN poetry install --no-interaction --no-ansi -vvv --no-root
 
 EXPOSE 8080
 ENV PYTHONPATH=.
 
-CMD sh -c "poetry run alembic upgrade head && poetry run hypercorn -c file:hypercorn.conf.py --worker-class uvloop main:app"
+CMD sh -c "poetry run alembic upgrade head && poetry run uvicorn main:app --host 0.0.0.0 --port 8081"
