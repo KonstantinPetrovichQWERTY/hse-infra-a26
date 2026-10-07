@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -153,7 +153,7 @@ class DevicePostgreDAO(DeviceDataStorage):
 
         measurement = Measurement(
             device_id=device_id,
-            timestamp=datetime.now(),
+            timestamp=datetime.now(UTC),
             **measurement_data.model_dump(),
         )
 

@@ -74,7 +74,7 @@ async def readiness():
     except ConnectionError as e:
         logger.warning("readiness: ConnectionError", err=e)
         msg = "No connection to database"
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - readiness must report unexpected failures
         logger.warning("readiness: Unexpected error", err=e)
         msg = f"Unexpected error: {e!s}"
 

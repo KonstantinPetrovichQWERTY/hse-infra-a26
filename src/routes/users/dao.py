@@ -132,7 +132,7 @@ class UserPostgreDAO(UserDataStorage):
         start_date: datetime | None = None,
         end_date: datetime | None = None,
     ) -> UserAggregatedStatsResponse:
-        user, devices, _, all_measurements = await self._get_user_measurements(
+        _, devices, _, all_measurements = await self._get_user_measurements(
             session, user_id, start_date, end_date
         )
 
@@ -156,7 +156,7 @@ class UserPostgreDAO(UserDataStorage):
         end_date: datetime | None = None,
     ) -> UserDeviceStatsResponse:
         (
-            user,
+            _,
             devices,
             device_measurements_map,
             all_measurements,

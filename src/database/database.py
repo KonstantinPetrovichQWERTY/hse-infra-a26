@@ -12,6 +12,10 @@ from sqlalchemy.ext.asyncio import (
 from src.database.models import Base
 
 
+class DatabaseSessionManagerError(RuntimeError):
+    """Raised when the database session manager has not been initialized."""
+
+
 class DatabaseSessionManager:
     def __init__(self) -> None:
         self._engine: AsyncEngine | None = None
@@ -23,7 +27,9 @@ class DatabaseSessionManager:
 
     async def close(self):
         if self._engine is None:
-            raise Exception("DatabaseSessionManager is not initialized. `Close` method")
+            raise DatabaseSessionManagerError(
+                "DatabaseSessionManager is not initialized. `Close` method"
+            )
         await self._engine.dispose()
         self._engine = None
         self._sessionmaker = None
@@ -31,7 +37,7 @@ class DatabaseSessionManager:
     @contextlib.asynccontextmanager
     async def connect(self) -> AsyncIterator[AsyncConnection]:
         if self._engine is None:
-            raise Exception(
+            raise DatabaseSessionManagerError(
                 "DatabaseSessionManager is not initialized. `Connect` method"
             )
 
@@ -45,7 +51,7 @@ class DatabaseSessionManager:
     @contextlib.asynccontextmanager
     async def session(self) -> AsyncIterator[AsyncSession]:
         if self._sessionmaker is None:
-            raise Exception(
+            raise DatabaseSessionManagerError(
                 "DatabaseSessionManager is not initialized. `Session` method"
             )
 

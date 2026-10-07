@@ -1,7 +1,8 @@
 import tomli
 
 try:
-    __version__ = tomli.load(open("pyproject.toml", "rb"))["project"]["version"]
-except Exception as e:
+    with open("pyproject.toml", "rb") as project_file:
+        __version__ = tomli.load(project_file)["project"]["version"]
+except (KeyError, OSError, tomli.TOMLDecodeError) as e:
     print(e)
     __version__ = "test"
